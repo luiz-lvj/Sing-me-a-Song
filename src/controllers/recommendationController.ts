@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
-import {deleteRecommendation, postRecommendationRepository, recommendationScore, setRecommendationScore} from "../repositories/recommendationRepository";
-import { downvoteScore, isUnvalidScore, isValidYoutubeLink, upvoteScore } from "../services/recommendationService";
+import {deleteRecommendation, getAllRecomendations, postRecommendationRepository, recommendationScore, setRecommendationScore} from "../repositories/recommendationRepository";
+import { recommendationObj } from "../routes/recommendationRouter";
+import { downvoteScore, getRandomRecommendation, isUnvalidScore, isValidYoutubeLink, upvoteScore } from "../services/recommendationService";
 
 export async function postRecommendationController(req: Request, res: Response){
     try{
@@ -62,6 +63,20 @@ export async function recommendationDownvoteController(req: Request, res: Respon
             return res.sendStatus(201);
         }
 
+    } catch{
+        return res.sendStatus(500);
+    }
+}
+
+export async function randomRecommendationController(req: Request, res: Response){
+    try{
+        const recommendations: recommendationObj[] = await getAllRecomendations();
+        const recommended: recommendationObj = getRandomRecommendation(recommendations);
+        if(Object.keys(recommended).length === 0){
+            return res.sendStatus(404);
+        }
+        res.status(200);
+        return res.send(recommended);
     } catch{
         return res.sendStatus(500);
     }

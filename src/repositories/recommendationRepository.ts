@@ -1,4 +1,5 @@
 import connection from "../database";
+import { recommendationObj } from "../routes/recommendationRouter";
 
 export async function postRecommendationRepository(name: string, youtubeLink: string, initialScore: number): Promise<boolean>{
     try{
@@ -36,11 +37,20 @@ export async function setRecommendationScore(recommendationId: number, newScore:
     }
 }
 
-export async function deleteRecommendation(recommendationId: number){
+export async function deleteRecommendation(recommendationId: number): Promise<void>{
     try{
         await connection.query(`DELETE FROM recommendations WHERE
         id=$1`, [recommendationId]);
     } catch{
         console.error("Problems deleting");
+    }
+}
+
+export async function getAllRecomendations(): Promise<recommendationObj[]>{
+    try{
+        const recommendation = await connection.query(`SELECT * FROM recommendations`);
+        return recommendation.rows;
+    } catch{
+        return [];
     }
 }
