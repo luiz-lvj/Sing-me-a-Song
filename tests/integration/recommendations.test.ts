@@ -2,6 +2,7 @@ import "../../src/setup";
 import supertest from "supertest";
 import app from "../../src/app";
 import connection from "../../src/database";
+import { recommendationObj } from "../../src/routes/recommendationRouter";
 
 describe("POST /recommendations", () => {
   it("returns 400 for wrong body", async () =>{
@@ -89,6 +90,31 @@ describe("GET /recommendations/random", () =>{
     expect(recommendation.body).toHaveProperty('score');
   });
 });
+
+describe("GET /recommendations/top/:amount", () =>{
+  it("returns 400 for bad url", async () =>{
+    const recommendations = await supertest(app).get("/recommendations/top/anything").send();
+    expect(recommendations.status).toBe(400);
+  });
+  it("returns 200 for valid recommendations", async () => {
+    await connection.query(`INSERT INTO recommendations(
+      name, "youtubeLink", score) VALUES($1, $2, $3) RETURNING *` , ['aa', 'bb', 0]);
+    await connection.query(`INSERT INTO recommendations(
+      name, "youtubeLink", score) VALUES($1, $2, $3) RETURNING *` , ['aa', 'bb', -1]);
+    await connection.query(`INSERT INTO recommendations(
+      name, "youtubeLink", score) VALUES($1, $2, $3) RETURNING *` , ['aa', 'bb', 10]);
+    const recommendations = await supertest(app).get("/recommendations/top/4").send();
+    expect(recommendations.status).toBe(200);
+    expect(recommendations.body).toBeInstanceOf(Array);
+
+    const recommendation1: recommendationObj = recommendations.body[0];
+    const recommendation2: recommendationObj = recommendations.body[1];
+    const recommendation3: recommendationObj = recommendations.body[2];
+    expect(recommendation1.score).toBe(10);
+    expect(recommendation2.score).toBe(0);
+    expect(recommendation3.score).toBe(-1);
+  });
+})
 
 beforeEach(async () =>{
     await connection.query("DELETE FROM recommendations");
