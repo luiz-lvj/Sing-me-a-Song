@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
-import {postRecommendationRepository, recommendationScore, setRecommendationScore} from "../repositories/recommendationRepository";
-import { isValidYoutubeLink, upvoteScore } from "../services/recommendationService";
+import {deleteRecommendation, postRecommendationRepository, recommendationScore, setRecommendationScore} from "../repositories/recommendationRepository";
+import { downvoteScore, isUnvalidScore, isValidYoutubeLink, upvoteScore } from "../services/recommendationService";
 
 export async function postRecommendationController(req: Request, res: Response){
     try{
@@ -31,10 +31,35 @@ export async function recommendationUpvoteController(req: Request, res: Response
             return res.sendStatus(404);
         }
         const newScore:number = upvoteScore(score);
-        if(setRecommendationScore(recommendationId, newScore)){
+        if(await setRecommendationScore(recommendationId, newScore)){
             return res.sendStatus(201);
         }
         return res.sendStatus(404);
+    } catch{
+        return res.sendStatus(500);
+    }
+}
+
+export async function recommendationDownvoteController(req: Request, res: Response){
+    try{
+        const recommendationId: number = parseInt(req.params.id);
+        if(!recommendationId || recommendationId <= 0){
+            return res.sendStatus(400);
+        }
+        const score: number = await recommendationScore(recommendationId);
+        if(score <= 0){
+            return res.sendStatus(404);
+        }
+        if(isUnvalidScore(score)){
+            await deleteRecommendation(recommendationId);
+            res.status(200);
+            return res.send("Recommendation deleted!");
+        }
+        const newScore = downvoteScore(score);
+        if(await setRecommendationScore(recommendationId, newScore)){
+            return res.sendStatus(201);
+        }
+
     } catch{
         return res.sendStatus(500);
     }

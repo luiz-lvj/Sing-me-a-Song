@@ -13,7 +13,7 @@ export async function postRecommendationRepository(name: string, youtubeLink: st
 
 export async function recommendationScore(recommendationId: number): Promise<number>{
     try{
-        const recommendations = await connection.query(`SELECT score from recommendations
+        const recommendations = await connection.query(`SELECT score FROM recommendations
         WHERE id=$1`, [recommendationId]);
         
         if(recommendations && recommendations.rowCount > 0){
@@ -33,5 +33,14 @@ export async function setRecommendationScore(recommendationId: number, newScore:
         return true;
     } catch{
         return false;
+    }
+}
+
+export async function deleteRecommendation(recommendationId: number){
+    try{
+        await connection.query(`DELETE FROM recommendations WHERE
+        id=$1`, [recommendationId]);
+    } catch{
+        console.error("Problems deleting");
     }
 }
