@@ -11,18 +11,18 @@ export async function postRecommendationRepository(name: string, youtubeLink: st
     }
 }
 
-export async function recommendationScore(recommendationId: number): Promise<number>{
+export async function recommendationScore(recommendationId: number): Promise<[boolean, number]>{
     try{
         const recommendations = await connection.query(`SELECT score FROM recommendations
         WHERE id=$1`, [recommendationId]);
         
         if(recommendations && recommendations.rowCount > 0){
             const score: number = recommendations.rows[0].score;
-            return score;
+            return [true, score];
         }
-        return -1;
+        return [false, -1];
     } catch{
-        return -1;
+        return [false, -1];
     }
 }
 

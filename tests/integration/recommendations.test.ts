@@ -28,6 +28,25 @@ describe("POST /recommendations", () => {
       expect(recommendation.status).toBe(201);
   })
 });
+
+describe("POST /recommendations/:id/upvote",() =>{
+  it("returns 400 for bad request", async () =>{
+    const recommendation = await supertest(app).post("/recommendations/anything/upvote").send();
+    expect(recommendation.status).toBe(400);
+  });
+  it("returns 404 for unauthorized access", async () =>{
+    const recommendation = await supertest(app).post("/recommendations/0/upvote").send();
+    expect(recommendation.status).toBe(404);
+  });
+  it("returns 201 for valid upvote", async () =>{
+    const createRecommendation = await connection.query(`INSERT INTO recommendations(
+    name, "youtubeLink", score) VALUES($1, $2, $3) RETURNING *` , ['aa', 'bb', 0]);
+    const recommendationId:number = createRecommendation.rows[0].id;
+    const recommendationUpvote = await supertest(app).post(`/recommendations/${recommendationId}/upvote`).send();
+    expect(recommendationUpvote.status).toBe(201);
+  });
+})
+
 beforeEach(async () =>{
     await connection.query("DELETE FROM recommendations");
 });

@@ -23,13 +23,14 @@ export async function postRecommendationController(req: Request, res: Response){
 export async function recommendationUpvoteController(req: Request, res: Response){
     try{
         const recommendationId: number = parseInt(req.params.id);
-        if(!recommendationId || recommendationId <= 0){
+        if(isNaN(recommendationId) || recommendationId < 0){
             return res.sendStatus(400);
         }
-        const score: number = await recommendationScore(recommendationId);
-        if(score <= 0){
+        const responseScore: [boolean, number] = await recommendationScore(recommendationId);
+        if(!responseScore[0]){
             return res.sendStatus(404);
         }
+        const score = responseScore[1];
         const newScore:number = upvoteScore(score);
         if(await setRecommendationScore(recommendationId, newScore)){
             return res.sendStatus(201);
@@ -43,13 +44,14 @@ export async function recommendationUpvoteController(req: Request, res: Response
 export async function recommendationDownvoteController(req: Request, res: Response){
     try{
         const recommendationId: number = parseInt(req.params.id);
-        if(!recommendationId || recommendationId <= 0){
+        if(isNaN(recommendationId) || recommendationId < 0){
             return res.sendStatus(400);
         }
-        const score: number = await recommendationScore(recommendationId);
-        if(score <= 0){
+        const responseScore: [boolean, number] = await recommendationScore(recommendationId);
+        if(!responseScore[0]){
             return res.sendStatus(404);
         }
+        const score = responseScore[1];
         if(isUnvalidScore(score)){
             await deleteRecommendation(recommendationId);
             res.status(200);
