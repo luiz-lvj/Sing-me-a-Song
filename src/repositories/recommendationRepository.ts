@@ -54,3 +54,13 @@ export async function getAllRecomendations(): Promise<recommendationObj[]>{
         return [];
     }
 }
+
+export async function getTopRecommendations(amount: number): Promise<recommendationObj[]>{
+    try{
+        const recommendations = await connection.query(`SELECT * FROM recommendations
+        ORDER BY score DESC LIMIT $1`, [amount]);
+        return recommendations.rows;
+    } catch{
+        return [];
+    }
+}

@@ -88,7 +88,7 @@ describe("GET /recommendations/random", () =>{
     expect(recommendation.body).toHaveProperty('youtubeLink');
     expect(recommendation.body).toHaveProperty('score');
   });
-})
+});
 
 beforeEach(async () =>{
     await connection.query("DELETE FROM recommendations");

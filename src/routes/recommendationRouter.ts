@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import {postRecommendationController, randomRecommendationController, recommendationDownvoteController, recommendationUpvoteController} from "../controllers/recommendationController";
+import {postRecommendationController, randomRecommendationController, recommendationDownvoteController, recommendationUpvoteController, topRecommendationsController} from "../controllers/recommendationController";
 
 export interface recommendationObj{
     id?: number,
@@ -15,5 +15,6 @@ recommendationRouter.post("/:id/downvote", recommendationDownvoteController);
 recommendationRouter.post("", postRecommendationController);
 
 recommendationRouter.get("/random", randomRecommendationController);
+recommendationRouter.get("/top/:amount", topRecommendationsController);
 
 export default recommendationRouter;

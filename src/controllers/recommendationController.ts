@@ -1,5 +1,5 @@
 import {Request, Response} from "express";
-import {deleteRecommendation, getAllRecomendations, postRecommendationRepository, recommendationScore, setRecommendationScore} from "../repositories/recommendationRepository";
+import {deleteRecommendation, getAllRecomendations, getTopRecommendations, postRecommendationRepository, recommendationScore, setRecommendationScore} from "../repositories/recommendationRepository";
 import { recommendationObj } from "../routes/recommendationRouter";
 import { downvoteScore, getRandomRecommendation, isUnvalidScore, isValidYoutubeLink, upvoteScore } from "../services/recommendationService";
 
@@ -77,6 +77,20 @@ export async function randomRecommendationController(req: Request, res: Response
         }
         res.status(200);
         return res.send(recommended);
+    } catch{
+        return res.sendStatus(500);
+    }
+}
+
+export async function topRecommendationsController(req: Request, res: Response){
+    try{
+        const amount: number = parseInt(req.params.amount);
+        if(isNaN(amount) || amount < 0){
+            return res.sendStatus(400);
+        }
+        const recommendations = await getTopRecommendations(amount);
+        res.status(200);
+        return res.send(recommendations);
     } catch{
         return res.sendStatus(500);
     }
