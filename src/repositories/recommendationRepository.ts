@@ -1,4 +1,3 @@
-import { QueryResult } from "pg";
 import connection from "../database";
 
 async function postRecommendationRepository(name: string, youtubeLink: string, initialScore: number): Promise<boolean>{
