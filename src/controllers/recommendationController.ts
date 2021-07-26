@@ -1,8 +1,8 @@
 import {Request, Response} from "express";
-import postRecommendationRepository from "../repositories/recommendationRepository";
-import { isValidYoutubeLink } from "../services/recommendationService";
+import {postRecommendationRepository, recommendationScore, setRecommendationScore} from "../repositories/recommendationRepository";
+import { isValidYoutubeLink, upvoteScore } from "../services/recommendationService";
 
-async function postRecommendationController(req: Request, res: Response){
+export async function postRecommendationController(req: Request, res: Response){
     try{
         if(req.body.name === undefined || req.body.youtubeLink === undefined){
             return res.sendStatus(400);
@@ -20,4 +20,22 @@ async function postRecommendationController(req: Request, res: Response){
     }
 }
 
-export default postRecommendationController;
+export async function recommendationUpvoteController(req: Request, res: Response){
+    try{
+        const recommendationId: number = parseInt(req.params.id);
+        if(!recommendationId || recommendationId <= 0){
+            return res.sendStatus(400);
+        }
+        const score: number = await recommendationScore(recommendationId);
+        if(score <= 0){
+            return res.sendStatus(404);
+        }
+        const newScore:number = upvoteScore(score);
+        if(setRecommendationScore(recommendationId, newScore)){
+            return res.sendStatus(201);
+        }
+        return res.sendStatus(404);
+    } catch{
+        return res.sendStatus(500);
+    }
+}
