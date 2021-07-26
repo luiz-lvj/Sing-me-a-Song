@@ -70,6 +70,24 @@ describe("POST /recommendations/:id/downvote", () => {
     const recommendationDownvote = await supertest(app).post(`/recommendations/${recommendationId}/downvote`).send();
     expect(recommendationDownvote.status).toBe(201);
   });
+});
+
+describe("GET /recommendations/random", () =>{
+  it("returns 404 for no musics", async () =>{
+    const recommendation = await supertest(app).get("/recommendations/random").send();
+    expect(recommendation.status).toBe(404);
+  });
+  it("returns 200 for valid recommendation", async () =>{
+    const createRecommendation = await connection.query(`INSERT INTO recommendations(
+      name, "youtubeLink", score) VALUES($1, $2, $3) RETURNING *` , ['aa', 'bb', 0]);
+    const recommendation = await supertest(app).get("/recommendations/random").send();
+    expect(recommendation.status).toBe(200);
+    expect(recommendation.body).toBeInstanceOf(Object);
+    expect(recommendation.body).toHaveProperty('id');
+    expect(recommendation.body).toHaveProperty('name');
+    expect(recommendation.body).toHaveProperty('youtubeLink');
+    expect(recommendation.body).toHaveProperty('score');
+  });
 })
 
 beforeEach(async () =>{
